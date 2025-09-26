@@ -8,17 +8,19 @@ package swervelib;
 public class SwerveModuleConfig {
   public final int driveMotorId;
   public final int angleMotorId;
+  public final int encoderId;
   public final boolean driveMotorReversed;
   public final boolean angleMotorReversed;
   public final boolean angleEncoderReversed;
   public final double angleEncoderConversionFactor;
   public final double angleEncoderOffset;
 
-  public SwerveModuleConfig(int driveMotorId, int angleMotorId, boolean driveMotorReversed,
+  public SwerveModuleConfig(int driveMotorId, int angleMotorId, int encoderId, boolean driveMotorReversed,
             boolean angleMotorReversed, boolean angleEncoderReversed, double angleEncoderConversionFactor,
             double angleEncoderOffset) {
       this.driveMotorId = driveMotorId;
       this.angleMotorId = angleMotorId;
+      this.encoderId = encoderId;
       this.driveMotorReversed = driveMotorReversed;
       this.angleMotorReversed = angleMotorReversed;
       this.angleEncoderReversed = angleEncoderReversed;

@@ -4,6 +4,8 @@
 
 package swervelib;
 
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -17,29 +19,30 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants.SwervePID;
 
 /** Add your docs here. */
 public class SwerveModule {
-  private SparkMax angleMotor;
-  private SparkMax speedMotor;
-  private RelativeEncoder speedEncoder;
+  private TalonFX angleMotor;
+  private TalonFX speedMotor;
   private PIDController pidController;
-  private SparkAbsoluteEncoder encoder;
+  private CANcoder encoder;
   private double maxVelocity;
   private double maxVoltage;
 
-  public SwerveModule(int angleMotorId, int speedMotorId, boolean driveMotorReversed, boolean angleMotorReversed,
+  public SwerveModule(int angleMotorId, int speedMotorId, int encoderId, boolean driveMotorReversed, boolean angleMotorReversed,
       boolean angleEncoderReversed, double angleEncoderConversionFactor, double angleEncoderOffset,
       double maxVelocity, double maxVoltage) {
-    this.angleMotor = new SparkMax(angleMotorId, MotorType.kBrushless);
-    this.speedMotor = new SparkMax(speedMotorId, MotorType.kBrushless);
+    this.angleMotor = new TalonFX(angleMotorId);
+    this.speedMotor = new TalonFX(speedMotorId);
 
     //this.angleMotor.restoreFactoryDefaults();
     //this.speedMotor.restoreFactoryDefaults();
 
     this.pidController = new PIDController(SwervePID.p, SwervePID.i, SwervePID.d);
-    this.encoder = this.angleMotor.getAbsoluteEncoder();
+    this.encoder =  new CANcoder(encoderId);
     this.maxVelocity = maxVelocity;
     this.maxVoltage = maxVoltage;
 
@@ -66,7 +69,7 @@ public class SwerveModule {
           .positionConversionFactor(rotationsToDistance)
           .velocityConversionFactor(rotationsToDistance/60);
 
-    this.speedEncoder = this.speedMotor.getEncoder();
+    
     
     //angleMotor.setSmartCurrentLimit(DriveConstants.currentLimit);
     //speedMotor.setSmartCurrentLimit(DriveConstants.currentLimit);
@@ -77,6 +80,7 @@ public class SwerveModule {
   public SwerveModule(SwerveModuleConfig config, double maxVelocity, double maxVoltage) {
     this(config.angleMotorId,
         config.driveMotorId,
+        config.encoderId,
         config.driveMotorReversed,
         config.angleMotorReversed,
         config.angleEncoderReversed,
@@ -124,14 +128,22 @@ public class SwerveModule {
    *         Straight Forward should be 0 (with the addjustment of module offset)
    */
   public double getEncoder() {
-    return encoder.getPosition() * 360.0;
+    return encoder.getPosition().getValueAsDouble() * 360.0;
+  }
+
+  public void setRelativeEncoder() {
+    this.angleMotor.setPosition(encoder.getPosition().getValueAsDouble());
+  }
+
+  public double getRelativeEncoder() {
+    return this.angleMotor.getPosition().getValueAsDouble() * 360.0;
   }
 
   /*
    * Return the applied voltage on the drive motor (0-12V)
    */
   public double getDriveOutput() {
-    return speedMotor.getAppliedOutput();
+    return speedMotor.getMotorOutputStatus().getValueAsDouble();
   }
 
   /*
@@ -154,13 +166,13 @@ public class SwerveModule {
    * return the valid location in meters.
    */
   public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(speedEncoder.getPosition(), getRotation());
+    return new SwerveModulePosition(speedMotor.getPosition().getValueAsDouble(), getRotation());
   }
 
   /*
    * Another view of the module state, showing velocity instead of position
    */
   public SwerveModuleState getState() {
-    return new SwerveModuleState(speedEncoder.getVelocity(), getRotation());
+    return new SwerveModuleState(speedMotor.getVelocity().getValueAsDouble(), getRotation());
   }
 }

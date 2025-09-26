@@ -38,6 +38,7 @@ public final class Constants {
       public static final SwerveModuleConfig frontLeft = new SwerveModuleConfig(
           8,
           1,
+          18,
           true,
           true,
           false,
@@ -49,6 +50,7 @@ public final class Constants {
       public static final SwerveModuleConfig frontRight= new SwerveModuleConfig(
           6,
           7,
+          19,
           true,
           true,
           false,
@@ -60,6 +62,7 @@ public final class Constants {
       public static final SwerveModuleConfig backRight = new SwerveModuleConfig(
           4,
           5,
+          20,
           true,
           true,
           false,
@@ -71,6 +74,7 @@ public final class Constants {
       public static final SwerveModuleConfig backLeft = new SwerveModuleConfig(
           2,
           3,
+          21,
           true,
           true,
           false,
