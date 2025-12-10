@@ -4,8 +4,12 @@
 
 package swervelib;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -28,46 +32,67 @@ public class SwerveModule {
   private TalonFX angleMotor;
   private TalonFX speedMotor;
   private PIDController pidController;
-  private CANcoder encoder;
+  private CANcoder absoluteEncoder;
   private double maxVelocity;
   private double maxVoltage;
+
+ private double driveReduction = 1.0 / 6.75;
+ private double WHEEL_DIAMETER = 0.1016;
+ private double rotationsToDistance = driveReduction * WHEEL_DIAMETER * Math.PI;
+
+ private final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
+
+
 
   public SwerveModule(int angleMotorId, int speedMotorId, int encoderId, boolean driveMotorReversed, boolean angleMotorReversed,
       boolean angleEncoderReversed, double angleEncoderConversionFactor, double angleEncoderOffset,
       double maxVelocity, double maxVoltage) {
+
+        constants = new SwerveModuleConstants<>();
     this.angleMotor = new TalonFX(angleMotorId);
     this.speedMotor = new TalonFX(speedMotorId);
 
-    //this.angleMotor.restoreFactoryDefaults();
-    //this.speedMotor.restoreFactoryDefaults();
+    var speedConfig = constants.DriveMotorInitialConfigs;
+    speedConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    speedConfig.Slot0 = constants.DriveMotorGains;
+    speedConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
+    speedConfig.TorqueCurrent.PeakForwardTorqueCurrent = constants.SlipCurrent;
+    speedConfig.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent;
+    speedConfig.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
+    speedConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+
+    speedMotor.getConfigurator().apply(speedConfig, 0.25);
+
+    var turnConfig = new TalonFXConfiguration();
+    turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    turnConfig.Slot0 = constants.SteerMotorGains;
 
     this.pidController = new PIDController(SwervePID.p, SwervePID.i, SwervePID.d);
-    this.encoder =  new CANcoder(encoderId);
+    this.absoluteEncoder =  new CANcoder(encoderId);
     this.maxVelocity = maxVelocity;
     this.maxVoltage = maxVoltage;
 
     this.pidController.enableContinuousInput(-180, 180);
 
-    double driveReduction = 1.0 / 6.75;
-    double WHEEL_DIAMETER = 0.1016;
-    double rotationsToDistance = driveReduction * WHEEL_DIAMETER * Math.PI;
+    angleMotor.setPosition(absoluteEncoder.getPosition().getValueAsDouble()*360);
 
-    SparkBaseConfig angleMotorConfig = new SparkMaxConfig();
-        angleMotorConfig
-          .inverted(angleMotorReversed)
-          .idleMode(IdleMode.kBrake);
-        angleMotorConfig.absoluteEncoder
-          .positionConversionFactor(1)
-          .velocityConversionFactor(1)
-          .inverted(angleEncoderReversed);
 
-    SparkBaseConfig speedMotorConfig = new SparkMaxConfig();
-        speedMotorConfig
-          .inverted(driveMotorReversed)
-          .idleMode(IdleMode.kBrake);
-        speedMotorConfig.encoder
-          .positionConversionFactor(rotationsToDistance)
-          .velocityConversionFactor(rotationsToDistance/60);
+    // SparkBaseConfig angleMotorConfig = new SparkMaxConfig();
+    //     angleMotorConfig
+    //       .inverted(angleMotorReversed)
+    //       .idleMode(IdleMode.kBrake);
+    //     angleMotorConfig.absoluteEncoder
+    //       .positionConversionFactor(1)
+    //       .velocityConversionFactor(1)
+    //       .inverted(angleEncoderReversed);
+
+    // SparkBaseConfig speedMotorConfig = new SparkMaxConfig();
+    //     speedMotorConfig
+    //       .inverted(driveMotorReversed)
+    //       .idleMode(IdleMode.kBrake);
+    //     speedMotorConfig.encoder
+    //       .positionConversionFactor(rotationsToDistance)
+    //       .velocityConversionFactor(rotationsToDistance/60);
 
     
     
@@ -102,7 +127,7 @@ public class SwerveModule {
    */
   private void drive(double speedMetersPerSecond, double angle) {
     double drive_voltage = (speedMetersPerSecond / maxVelocity) * maxVoltage;
-    double angle_voltage = pidController.calculate(this.getEncoder(), angle);
+    double angle_voltage = pidController.calculate( angle);
 
     speedMotor.setVoltage(drive_voltage);
     angleMotor.setVoltage(angle_voltage);
@@ -127,17 +152,15 @@ public class SwerveModule {
    * @return Return the module angle in degrees 0-360. CCW positive.
    *         Straight Forward should be 0 (with the addjustment of module offset)
    */
-  public double getEncoder() {
-    return encoder.getPosition().getValueAsDouble() * 360.0;
+  public double getRelEncoderRotations() {
+    return angleMotor.getPosition().getValueAsDouble();
   }
 
-  public void setRelativeEncoder() {
-    this.angleMotor.setPosition(encoder.getPosition().getValueAsDouble());
+  public double getRelativeEncoderDeg() {
+    return angleMotor.getPosition().getValueAsDouble() * 360.0;
   }
 
-  public double getRelativeEncoder() {
-    return this.angleMotor.getPosition().getValueAsDouble() * 360.0;
-  }
+
 
   /*
    * Return the applied voltage on the drive motor (0-12V)
@@ -150,14 +173,14 @@ public class SwerveModule {
    * Return a rotation object for the module absolute encoder.
    */
   private Rotation2d getRotation() {
-    return Rotation2d.fromDegrees(getEncoder());
+    return Rotation2d.fromDegrees(absoluteEncoder.getPosition().getValueAsDouble()*360);
   }
 
   /*
    * Return the absolute encoder position in radians (0-2pi)
    */
   public double getEncoderRadians() {
-    return Units.degreesToRadians(getEncoder());
+    return Units.degreesToRadians(absoluteEncoder.getPosition().getValueAsDouble()*2*Math.PI);
   }
 
   /*
