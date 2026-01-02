@@ -17,6 +17,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.reduxrobotics.sensors.canandmag.Canandmag;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -32,7 +33,7 @@ public class SwerveModule {
   private TalonFX angleMotor;
   private TalonFX speedMotor;
   private PIDController pidController;
-  private CANcoder absoluteEncoder;
+  private Canandmag absoluteEncoder;
   private double maxVelocity;
   private double maxVoltage;
 
@@ -41,8 +42,6 @@ public class SwerveModule {
  private double rotationsToDistance = driveReduction * WHEEL_DIAMETER * Math.PI;
 
  private final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
-
-
 
   public SwerveModule(int angleMotorId, int speedMotorId, int encoderId, boolean driveMotorReversed, boolean angleMotorReversed,
       boolean angleEncoderReversed, double angleEncoderConversionFactor, double angleEncoderOffset,
@@ -68,13 +67,13 @@ public class SwerveModule {
     turnConfig.Slot0 = constants.SteerMotorGains;
 
     this.pidController = new PIDController(SwervePID.p, SwervePID.i, SwervePID.d);
-    this.absoluteEncoder =  new CANcoder(encoderId);
+    this.absoluteEncoder =  new Canandmag(encoderId);
     this.maxVelocity = maxVelocity;
     this.maxVoltage = maxVoltage;
 
     this.pidController.enableContinuousInput(-180, 180);
 
-    angleMotor.setPosition(absoluteEncoder.getPosition().getValueAsDouble()*360);
+    angleMotor.setPosition(absoluteEncoder.getAbsPosition()*360);
 
 
     // SparkBaseConfig angleMotorConfig = new SparkMaxConfig();
@@ -173,14 +172,14 @@ public class SwerveModule {
    * Return a rotation object for the module absolute encoder.
    */
   private Rotation2d getRotation() {
-    return Rotation2d.fromDegrees(absoluteEncoder.getPosition().getValueAsDouble()*360);
+    return Rotation2d.fromDegrees(absoluteEncoder.getAbsPosition()*360);
   }
 
   /*
    * Return the absolute encoder position in radians (0-2pi)
    */
   public double getEncoderRadians() {
-    return Units.degreesToRadians(absoluteEncoder.getPosition().getValueAsDouble()*2*Math.PI);
+    return Units.degreesToRadians(absoluteEncoder.getAbsPosition()*2*Math.PI);
   }
 
   /*

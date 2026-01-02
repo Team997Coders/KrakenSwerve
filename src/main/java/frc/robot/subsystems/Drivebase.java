@@ -23,6 +23,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -101,8 +103,8 @@ public class Drivebase extends SubsystemBase {
             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(0.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(0.0, 0.0, 0.0) // Rotation PID constants
+                    new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(1.0, 0.0, 0.0) // Rotation PID constants
             ),
             config, // The robot configuration
             () -> {
@@ -116,6 +118,27 @@ public class Drivebase extends SubsystemBase {
     );
 
     SmartDashboard.putData("Field", field);
+
+    SmartDashboard.putData("Swerve Drive", new Sendable() {
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    builder.setSmartDashboardType("SwerveDrive");
+
+    builder.addDoubleProperty("Front Left Angle", () -> frontLeft.getEncoderRadians(), null);
+    builder.addDoubleProperty("Front Left Velocity", () -> frontLeft.getDriveOutput(), null);
+
+    builder.addDoubleProperty("Front Right Angle", () -> frontRight.getEncoderRadians(), null);
+    builder.addDoubleProperty("Front Right Velocity", () -> frontRight.getDriveOutput(), null);
+
+    builder.addDoubleProperty("Back Left Angle", () -> backLeft.getEncoderRadians(), null);
+    builder.addDoubleProperty("Back Left Velocity", () -> backLeft.getDriveOutput(), null);
+
+    builder.addDoubleProperty("Back Right Angle", () -> backRight.getEncoderRadians(), null);
+    builder.addDoubleProperty("Back Right Velocity", () -> backRight.getDriveOutput(), null);
+
+    builder.addDoubleProperty("Robot Angle", () -> getFieldAngle(), null);
+  }
+});
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds()
