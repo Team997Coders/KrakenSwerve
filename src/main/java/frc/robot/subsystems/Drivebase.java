@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.Orchestra;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -139,6 +140,21 @@ public class Drivebase extends SubsystemBase {
     builder.addDoubleProperty("Robot Angle", () -> getFieldAngle(), null);
   }
 });
+
+Orchestra m_orchestra = new Orchestra();
+
+// Add a single device to the orchestra
+m_orchestra.addInstrument(frontLeft.getAngleMotor());
+m_orchestra.addInstrument(frontRight.getAngleMotor());
+m_orchestra.addInstrument(backLeft.getAngleMotor());
+m_orchestra.addInstrument(backRight.getAngleMotor());
+
+// Attempt to load the chrp
+var status = m_orchestra.loadMusic("starwars.chrp");
+
+if (!status.isOK()) {
+   // log error
+}
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds()

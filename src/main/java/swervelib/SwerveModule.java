@@ -160,6 +160,10 @@ public class SwerveModule {
   }
 
 
+  public TalonFX getAngleMotor() {
+    return angleMotor;
+  }
+
 
   /*
    * Return the applied voltage on the drive motor (0-12V)
