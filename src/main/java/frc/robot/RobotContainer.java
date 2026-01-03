@@ -14,6 +14,7 @@ import frc.robot.subsystems.vision.CameraBlock;
 
 import java.util.Arrays;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.reduxrobotics.canand.CanandEventLoop;
 import com.reduxrobotics.sensors.canandgyro.Canandgyro;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
@@ -43,7 +44,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final Canandgyro gyro = new Canandgyro(42);
+  private final Canandgyro gyro = new Canandgyro(46);
 
   private static XboxController driveStick = new XboxController(0);
 
@@ -60,6 +61,8 @@ public class RobotContainer {
 
   private final Drivebase drivebase = new Drivebase(gyro, cameraBlock);
 
+  
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -73,6 +76,8 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser("moveForward");
     SmartDashboard.putData("Auto Choser", autoChooser);
+
+    CanandEventLoop.getInstance();
 
     configureBindings();
   }

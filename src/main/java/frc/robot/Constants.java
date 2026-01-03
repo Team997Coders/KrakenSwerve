@@ -27,7 +27,7 @@ public final class Constants {
     public static final double slewRate = 20; // lower number for higher center of mass
 
     public static final class SwervePID {
-      public static final double p = 0.1;
+      public static final double p = 0.0025;
       public static final double i = 0;
       public static final double d = 0;
     }
@@ -36,9 +36,9 @@ public final class Constants {
 
       // Front Left Module
       public static final SwerveModuleConfig frontLeft = new SwerveModuleConfig(
-          8,
-          1,
-          18,
+          5,
+          6,
+          24,
           true,
           true,
           false,
@@ -48,9 +48,9 @@ public final class Constants {
 
       // Front Right
       public static final SwerveModuleConfig frontRight= new SwerveModuleConfig(
-          6,
           7,
-          19,
+          8,
+          23,
           true,
           true,
           false,
@@ -60,9 +60,9 @@ public final class Constants {
 
       // Back Right
       public static final SwerveModuleConfig backRight = new SwerveModuleConfig(
-          4,
-          5,
-          20,
+          1,
+          2,
+          21,
           true,
           true,
           false,
@@ -72,9 +72,9 @@ public final class Constants {
 
       // Back Left
       public static final SwerveModuleConfig backLeft = new SwerveModuleConfig(
-          2,
           3,
-          21,
+          4,
+          22,
           true,
           true,
           false,

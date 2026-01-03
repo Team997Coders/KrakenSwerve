@@ -9,6 +9,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.reduxrobotics.sensors.canandgyro.Canandgyro;
 import com.studica.frc.AHRS;
 
 import swervelib.SwerveModule;
@@ -44,7 +45,7 @@ public class Drivebase extends SubsystemBase {
 
   private final double MAX_VOLTAGE = 12;
 
-  private AHRS gyro;
+  private Canandgyro gyro;
 
   private SwerveModule frontLeft = new SwerveModule(SwerveModules.frontLeft, MAX_VELOCITY, MAX_VOLTAGE);
   private SwerveModule frontRight = new SwerveModule(SwerveModules.frontRight, MAX_VELOCITY, MAX_VOLTAGE);
@@ -74,7 +75,7 @@ public class Drivebase extends SubsystemBase {
   private CameraBlock cameraBlock;
 
   /** Creates a new Drivebase. */
-  public Drivebase(AHRS gyro, CameraBlock cameraBlock) {
+  public Drivebase(Canandgyro gyro, CameraBlock cameraBlock) {
     var inst = NetworkTableInstance.getDefault();
     var table = inst.getTable("SmartDashboard");
     this.fieldOrientedEntry = table.getBooleanTopic("Field Oriented").getEntry(true);
@@ -126,16 +127,16 @@ public class Drivebase extends SubsystemBase {
     builder.setSmartDashboardType("SwerveDrive");
 
     builder.addDoubleProperty("Front Left Angle", () -> frontLeft.getEncoderRadians(), null);
-    builder.addDoubleProperty("Front Left Velocity", () -> frontLeft.getDriveOutput(), null);
+    builder.addDoubleProperty("Front Left Velocity", () -> frontLeft.getVelocity(), null);
 
     builder.addDoubleProperty("Front Right Angle", () -> frontRight.getEncoderRadians(), null);
-    builder.addDoubleProperty("Front Right Velocity", () -> frontRight.getDriveOutput(), null);
+    builder.addDoubleProperty("Front Right Velocity", () -> frontRight.getVelocity(), null);
 
     builder.addDoubleProperty("Back Left Angle", () -> backLeft.getEncoderRadians(), null);
-    builder.addDoubleProperty("Back Left Velocity", () -> backLeft.getDriveOutput(), null);
+    builder.addDoubleProperty("Back Left Velocity", () -> backLeft.getVelocity(), null);
 
     builder.addDoubleProperty("Back Right Angle", () -> backRight.getEncoderRadians(), null);
-    builder.addDoubleProperty("Back Right Velocity", () -> backRight.getDriveOutput(), null);
+    builder.addDoubleProperty("Back Right Velocity", () -> backRight.getVelocity(), null);
 
     builder.addDoubleProperty("Robot Angle", () -> getFieldAngle(), null);
   }
@@ -187,11 +188,12 @@ if (!status.isOK()) {
       speedY = slewRateY.calculate(speedY);
     }
 
-    if (this.fieldOrientedEntry.get(true)) {
-      fieldOrientedDrive(speedX, speedY, rot);
-    } else {
-      robotOrientedDrive(speedX, speedY, rot);
-    }
+    // if (this.fieldOrientedEntry.get(true)) {
+    //   fieldOrientedDrive(speedX, speedY, rot);
+    // } else {
+    //   robotOrientedDrive(speedX, speedY, rot);
+    // }
+    robotOrientedDrive(speedX, speedY, rot);
   }
 
   /** drive:

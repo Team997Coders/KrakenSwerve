@@ -36,6 +36,8 @@ public class SwerveModule {
   private Canandmag absoluteEncoder;
   private double maxVelocity;
   private double maxVoltage;
+  private TalonFXConfiguration speedConfig;
+  private TalonFXConfiguration turnConfig;
 
  private double driveReduction = 1.0 / 6.75;
  private double WHEEL_DIAMETER = 0.1016;
@@ -51,7 +53,7 @@ public class SwerveModule {
     this.angleMotor = new TalonFX(angleMotorId);
     this.speedMotor = new TalonFX(speedMotorId);
 
-    var speedConfig = constants.DriveMotorInitialConfigs;
+    speedConfig = new TalonFXConfiguration();
     speedConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     speedConfig.Slot0 = constants.DriveMotorGains;
     speedConfig.Feedback.SensorToMechanismRatio = constants.DriveMotorGearRatio;
@@ -62,12 +64,15 @@ public class SwerveModule {
 
     speedMotor.getConfigurator().apply(speedConfig, 0.25);
 
-    var turnConfig = new TalonFXConfiguration();
+    turnConfig = new TalonFXConfiguration();
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     turnConfig.Slot0 = constants.SteerMotorGains;
 
+    angleMotor.getConfigurator().apply(speedConfig, 0.25);
+
     this.pidController = new PIDController(SwervePID.p, SwervePID.i, SwervePID.d);
     this.absoluteEncoder =  new Canandmag(encoderId);
+    //this.absoluteEncoder.getSettings().
     this.maxVelocity = maxVelocity;
     this.maxVoltage = maxVoltage;
 
@@ -172,18 +177,22 @@ public class SwerveModule {
     return speedMotor.getMotorOutputStatus().getValueAsDouble();
   }
 
+  public double getVelocity() {
+    return speedMotor.getVelocity().getValueAsDouble();
+  }
+
   /*
    * Return a rotation object for the module absolute encoder.
    */
   private Rotation2d getRotation() {
-    return Rotation2d.fromDegrees(absoluteEncoder.getAbsPosition()*360);
+    return new Rotation2d(absoluteEncoder.getAbsPosition()*2*Math.PI);
   }
 
   /*
    * Return the absolute encoder position in radians (0-2pi)
    */
   public double getEncoderRadians() {
-    return Units.degreesToRadians(absoluteEncoder.getAbsPosition()*2*Math.PI);
+    return (absoluteEncoder.getAbsPosition()*2*Math.PI);
   }
 
   /*
