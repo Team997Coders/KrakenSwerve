@@ -130,11 +130,16 @@ public class SwerveModule {
    *                             everything should be CCW positive.
    */
   private void drive(double speedMetersPerSecond, double angle) {
-    double drive_voltage = (speedMetersPerSecond / maxVelocity) * maxVoltage;
-    double angle_voltage = pidController.calculate( angle);
+    double drive_output = (speedMetersPerSecond / maxVelocity);
+    double angle_output = pidController.calculate( angle);
 
-    speedMotor.setVoltage(drive_voltage);
-    angleMotor.setVoltage(angle_voltage);
+    // if (pidController.atSetpoint())
+    // {
+    //   drive_output *= -1;
+    // }
+
+    speedMotor.set(drive_output);
+    angleMotor.set(angle_output);
   }
 
   /**
@@ -185,7 +190,7 @@ public class SwerveModule {
    * Return a rotation object for the module absolute encoder.
    */
   private Rotation2d getRotation() {
-    return new Rotation2d(absoluteEncoder.getAbsPosition()*2*Math.PI);
+    return new Rotation2d(getEncoderRadians());
   }
 
   /*
