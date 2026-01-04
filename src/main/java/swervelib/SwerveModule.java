@@ -25,6 +25,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants.SwervePID;
 
@@ -76,10 +77,9 @@ public class SwerveModule {
     this.maxVelocity = maxVelocity;
     this.maxVoltage = maxVoltage;
 
-    this.pidController.enableContinuousInput(-180, 180);
+    this.pidController.enableContinuousInput(0, 360);
 
     angleMotor.setPosition(absoluteEncoder.getAbsPosition()*360);
-
 
     // SparkBaseConfig angleMotorConfig = new SparkMaxConfig();
     //     angleMotorConfig
@@ -131,7 +131,11 @@ public class SwerveModule {
    */
   private void drive(double speedMetersPerSecond, double angle) {
     double drive_output = (speedMetersPerSecond / maxVelocity);
-    double angle_output = pidController.calculate( angle);
+    SmartDashboard.putNumber("angle", angle);
+    pidController.setSetpoint(angle);
+    double angle_output = -pidController.calculate(absoluteEncoder.getAbsPosition()* 360);
+
+    SmartDashboard.putNumber("angle output", angle_output);
 
     // if (pidController.atSetpoint())
     // {
@@ -183,7 +187,7 @@ public class SwerveModule {
   }
 
   public double getVelocity() {
-    return speedMotor.getVelocity().getValueAsDouble();
+    return speedMotor.getVelocity().getValueAsDouble() * rotationsToDistance;
   }
 
   /*
@@ -206,13 +210,13 @@ public class SwerveModule {
    * return the valid location in meters.
    */
   public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(speedMotor.getPosition().getValueAsDouble(), getRotation());
+    return new SwerveModulePosition(speedMotor.getPosition().getValueAsDouble() * rotationsToDistance, getRotation());
   }
 
   /*
    * Another view of the module state, showing velocity instead of position
    */
   public SwerveModuleState getState() {
-    return new SwerveModuleState(speedMotor.getVelocity().getValueAsDouble(), getRotation());
+    return new SwerveModuleState(getVelocity(), getRotation());
   }
 }

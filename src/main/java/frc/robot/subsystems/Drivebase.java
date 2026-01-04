@@ -142,19 +142,19 @@ public class Drivebase extends SubsystemBase {
   }
 });
 
-Orchestra m_orchestra = new Orchestra();
-
-// Add a single device to the orchestra
-m_orchestra.addInstrument(frontLeft.getAngleMotor());
-m_orchestra.addInstrument(frontRight.getAngleMotor());
-m_orchestra.addInstrument(backLeft.getAngleMotor());
-m_orchestra.addInstrument(backRight.getAngleMotor());
-
-// Attempt to load the chrp
-var status = m_orchestra.loadMusic("starwars.chrp");
-
-if (!status.isOK()) {
-   // log error
+try (Orchestra m_orchestra = new Orchestra()) {
+  // Add a single device to the orchestra
+  m_orchestra.addInstrument(frontLeft.getAngleMotor());
+  m_orchestra.addInstrument(frontRight.getAngleMotor());
+  m_orchestra.addInstrument(backLeft.getAngleMotor());
+  m_orchestra.addInstrument(backRight.getAngleMotor());
+  
+  // Attempt to load the chrp
+  var status = m_orchestra.loadMusic("starwars.chrp");
+  
+  if (!status.isOK()) {
+     // log error
+  }
 }
   }
 
