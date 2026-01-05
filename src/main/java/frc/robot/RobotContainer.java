@@ -44,24 +44,23 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final Canandgyro gyro = new Canandgyro(46);
+  private final Canandgyro gyro = new Canandgyro(Constants.gyroID);
 
+  //The same joystick - drivestick is for joystick inputs and c_driveStick is for button triggers
   private static XboxController driveStick = new XboxController(0);
-
-  // private static CommandXboxController c_driveStick2 = new
-  // CommandXboxController(1);
   private static CommandXboxController c_driveStick = new CommandXboxController(0);
 
+  //Pathplanner autoChooser
   private SendableChooser<Command> autoChooser;
 
-  private static final Camera frontCamera = new Camera("pineapple", new Transform3d(new Translation3d(0.254, 0, 0.1524), new Rotation3d(0, -0.785, 0)));
-  private static final Camera backCamera = new Camera("dragonfruit", new Transform3d(new Translation3d(-0.254, 0, 0.1524), new Rotation3d(Math.PI, -0.785, 0)));
+  //Cameras - pineapple is front facing camera
+  private static final Camera frontCamera = new Camera("pineapple", new Transform3d(new Translation3d(0.34, 0.025, 0.013), new Rotation3d(0, 0, 0)));
+  //private static final Camera backCamera = new Camera("dragonfruit", new Transform3d(new Translation3d(-0.254, 0, 0.1524), new Rotation3d(Math.PI, -0.785, 0)));
 
-  private static final CameraBlock cameraBlock = new CameraBlock(Arrays.asList(frontCamera, backCamera));
+  //Camera Block handles all cameras so we dont keep changing the amount of parameters of drivebase every time we add/remove a camera 
+  private static final CameraBlock cameraBlock = new CameraBlock(Arrays.asList(frontCamera));
 
   private final Drivebase drivebase = new Drivebase(gyro, cameraBlock);
-
-  
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -174,10 +173,6 @@ public class RobotContainer {
   private void configureBindings() {
     // Gyro Reset
     //c_driveStick.povUp().onTrue(Commands.runOnce(gyro::reset));
-    Command goToTag = new goToTag(drivebase, frontCamera, 0.0);
-    Command stop = new stop(goToTag);
-    JoystickButton button_a = new JoystickButton(driveStick, 1);
-    button_a.onTrue(goToTag).onFalse(stop);
   }
 
   /**
