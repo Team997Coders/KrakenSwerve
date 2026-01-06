@@ -62,6 +62,9 @@ public class RobotContainer {
 
   private final Drivebase drivebase = new Drivebase(gyro, cameraBlock);
 
+  //
+  private final ArrayList<Pose2d> potentialLocations = new ArrayList<Pose2d>();
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -173,6 +176,9 @@ public class RobotContainer {
   private void configureBindings() {
     // Gyro Reset
     //c_driveStick.povUp().onTrue(Commands.runOnce(gyro::reset));
+    
+    //When holding x robot goes to closest location in potential locations
+    //c_driveStick.x().whileTrue(new goToLocation(drivebase, potentialLocations));
   }
 
   /**
