@@ -35,7 +35,7 @@ public class goToLocation extends Command {
     @SuppressWarnings("unused")
     private double thetaStart = 0;
 
-    public goToLocation(Drivebase drivebase, List<Pose2d> poses) {
+    public goToLocation(Drivebase drivebase, ArrayList<Pose2d> poses) {
         this.drivebase = drivebase;
         this.poses = poses;
 
@@ -51,11 +51,8 @@ public class goToLocation extends Command {
     @Override
     public void initialize() {
         double bestDistance = 99999;
-
         Pose2d bestPose;
-
         Pose2d robotPose = this.drivebase.getPose();
-
         List<Double> distances = new ArrayList<>();
 
         for (int i = 0; i < poses.size(); i++) {

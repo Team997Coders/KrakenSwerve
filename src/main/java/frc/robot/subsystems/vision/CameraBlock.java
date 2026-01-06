@@ -8,19 +8,18 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 
 public class CameraBlock 
 {
-    List<Camera> cameraList;
+    ArrayList<Camera> cameraList;
 
-    public CameraBlock(List<Camera> cameraList)
+    public CameraBlock(ArrayList<Camera> cameraList)
     {
         this.cameraList = cameraList;
     }
 
     public void update(SwerveDrivePoseEstimator poseEstimator)
     {
-        List<PhotonPipelineResult> results = this.cameraList.get(0).getResults();
         for (Camera camera: this.cameraList)
         {
-            camera.update(poseEstimator, results);
+            camera.update(poseEstimator, camera.getResults());
         }
     }
 }
