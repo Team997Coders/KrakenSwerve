@@ -122,40 +122,25 @@ public class Drivebase extends SubsystemBase {
     SmartDashboard.putData("Field", field);
 
     SmartDashboard.putData("Swerve Drive", new Sendable() {
-  @Override
-  public void initSendable(SendableBuilder builder) {
-    builder.setSmartDashboardType("SwerveDrive");
+      @Override
+      public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("SwerveDrive");
 
-    builder.addDoubleProperty("Front Left Angle", () -> frontLeft.getEncoderRadians(), null);
-    builder.addDoubleProperty("Front Left Velocity", () -> frontLeft.getVelocity(), null);
+        builder.addDoubleProperty("Front Left Angle", () -> frontLeft.getEncoderRadians(), null);
+        builder.addDoubleProperty("Front Left Velocity", () -> frontLeft.getVelocity(), null);
 
-    builder.addDoubleProperty("Front Right Angle", () -> frontRight.getEncoderRadians(), null);
-    builder.addDoubleProperty("Front Right Velocity", () -> frontRight.getVelocity(), null);
+        builder.addDoubleProperty("Front Right Angle", () -> frontRight.getEncoderRadians(), null);
+        builder.addDoubleProperty("Front Right Velocity", () -> frontRight.getVelocity(), null);
 
-    builder.addDoubleProperty("Back Left Angle", () -> backLeft.getEncoderRadians(), null);
-    builder.addDoubleProperty("Back Left Velocity", () -> backLeft.getVelocity(), null);
+        builder.addDoubleProperty("Back Left Angle", () -> backLeft.getEncoderRadians(), null);
+        builder.addDoubleProperty("Back Left Velocity", () -> backLeft.getVelocity(), null);
 
-    builder.addDoubleProperty("Back Right Angle", () -> backRight.getEncoderRadians(), null);
-    builder.addDoubleProperty("Back Right Velocity", () -> backRight.getVelocity(), null);
+        builder.addDoubleProperty("Back Right Angle", () -> backRight.getEncoderRadians(), null);
+        builder.addDoubleProperty("Back Right Velocity", () -> backRight.getVelocity(), null);
 
-    builder.addDoubleProperty("Robot Angle", () -> getFieldAngle(), null);
-  }
-});
-
-try (Orchestra m_orchestra = new Orchestra()) {
-  // Add a single device to the orchestra
-  m_orchestra.addInstrument(frontLeft.getAngleMotor());
-  m_orchestra.addInstrument(frontRight.getAngleMotor());
-  m_orchestra.addInstrument(backLeft.getAngleMotor());
-  m_orchestra.addInstrument(backRight.getAngleMotor());
-  
-  // Attempt to load the chrp
-  var status = m_orchestra.loadMusic("starwars.chrp");
-  
-  if (!status.isOK()) {
-     // log error
-  }
-}
+        builder.addDoubleProperty("Robot Angle", () -> getFieldAngle(), null);
+      }
+    });
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds()
@@ -188,12 +173,11 @@ try (Orchestra m_orchestra = new Orchestra()) {
       speedY = slewRateY.calculate(speedY);
     }
 
-    // if (this.fieldOrientedEntry.get(true)) {
-    //   fieldOrientedDrive(speedX, speedY, rot);
-    // } else {
-    //   robotOrientedDrive(speedX, speedY, rot);
-    // }
-    robotOrientedDrive(speedX, speedY, rot);
+    if (this.fieldOrientedEntry.get(true)) {
+      fieldOrientedDrive(speedX, speedY, rot);
+    } else {
+      robotOrientedDrive(speedX, speedY, rot);
+    }
   }
 
   /** drive:

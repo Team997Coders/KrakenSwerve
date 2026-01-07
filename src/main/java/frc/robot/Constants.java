@@ -21,6 +21,8 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final int gyroID = 46;
+
   public static final class DriveConstants {
     public static final double deadband = 0.02;
     public static final int currentLimit = 40;

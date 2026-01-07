@@ -73,37 +73,11 @@ public class SwerveModule {
 
     this.pidController = new PIDController(SwervePID.p, SwervePID.i, SwervePID.d);
     this.absoluteEncoder =  new Canandmag(encoderId);
-    //this.absoluteEncoder.getSettings().
+
     this.maxVelocity = maxVelocity;
     this.maxVoltage = maxVoltage;
 
     this.pidController.enableContinuousInput(0, 360);
-
-    angleMotor.setPosition(absoluteEncoder.getAbsPosition()*360);
-
-    // SparkBaseConfig angleMotorConfig = new SparkMaxConfig();
-    //     angleMotorConfig
-    //       .inverted(angleMotorReversed)
-    //       .idleMode(IdleMode.kBrake);
-    //     angleMotorConfig.absoluteEncoder
-    //       .positionConversionFactor(1)
-    //       .velocityConversionFactor(1)
-    //       .inverted(angleEncoderReversed);
-
-    // SparkBaseConfig speedMotorConfig = new SparkMaxConfig();
-    //     speedMotorConfig
-    //       .inverted(driveMotorReversed)
-    //       .idleMode(IdleMode.kBrake);
-    //     speedMotorConfig.encoder
-    //       .positionConversionFactor(rotationsToDistance)
-    //       .velocityConversionFactor(rotationsToDistance/60);
-
-    
-    
-    //angleMotor.setSmartCurrentLimit(DriveConstants.currentLimit);
-    //speedMotor.setSmartCurrentLimit(DriveConstants.currentLimit);
-
-    //this.encoder.setZeroOffset(angleEncoderOffset);
   }
 
   public SwerveModule(SwerveModuleConfig config, double maxVelocity, double maxVoltage) {
@@ -131,19 +105,10 @@ public class SwerveModule {
    */
   private void drive(double speedMetersPerSecond, double angle) {
     double drive_output = (speedMetersPerSecond / maxVelocity);
-    SmartDashboard.putNumber("angle", angle);
-    pidController.setSetpoint(angle);
-    double angle_output = -pidController.calculate(absoluteEncoder.getAbsPosition()* 360);
-
-    SmartDashboard.putNumber("angle output", angle_output);
-
-    // if (pidController.atSetpoint())
-    // {
-    //   drive_output *= -1;
-    // }
-
     speedMotor.set(drive_output);
-    angleMotor.set(angle_output);
+
+    pidController.setSetpoint(angle);
+    angleMotor.set(-pidController.calculate(absoluteEncoder.getAbsPosition()* 360));
   }
 
   /**
@@ -159,25 +124,14 @@ public class SwerveModule {
     this.drive(state.speedMetersPerSecond, state.angle.getDegrees());
   }
 
-  /**
-   * getEncoder:
+  /** 
+   * getAngleMotor:
    * 
-   * @return Return the module angle in degrees 0-360. CCW positive.
-   *         Straight Forward should be 0 (with the addjustment of module offset)
+   * Return the angle motor TalonFX
    */
-  public double getRelEncoderRotations() {
-    return angleMotor.getPosition().getValueAsDouble();
-  }
-
-  public double getRelativeEncoderDeg() {
-    return angleMotor.getPosition().getValueAsDouble() * 360.0;
-  }
-
-
   public TalonFX getAngleMotor() {
     return angleMotor;
   }
-
 
   /*
    * Return the applied voltage on the drive motor (0-12V)
@@ -186,6 +140,11 @@ public class SwerveModule {
     return speedMotor.getMotorOutputStatus().getValueAsDouble();
   }
 
+
+  /** 
+   * Return the velocity on the drive motor (m/s)
+   * Generally maxed at 3-4 m/s, 5 m/s theoretically possible
+   */
   public double getVelocity() {
     return speedMotor.getVelocity().getValueAsDouble() * rotationsToDistance;
   }

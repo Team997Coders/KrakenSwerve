@@ -10,6 +10,8 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import com.revrobotics.spark.config.SmartMotionConfigAccessor;
+
 import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -19,6 +21,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivebase;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -26,7 +29,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 public class Camera
 {
     private PhotonCamera camera;
-    private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo);
+    private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
     private PhotonPoseEstimator photonPoseEstimator;
 
     private List<PhotonPipelineResult> results;
@@ -43,7 +46,6 @@ public class Camera
     public void update(SwerveDrivePoseEstimator poseEstimator, List<PhotonPipelineResult> results)
     {
         this.results = results;
-        SmartDashboard.putNumber("result size", this.results.size());
         if (!this.results.isEmpty())
         {
             for (PhotonPipelineResult result: results)
@@ -55,6 +57,12 @@ public class Camera
                 }
             }
         } 
+    }
+
+    public void update(SwerveDrivePoseEstimator poseEstimator)
+    {
+        List<PhotonPipelineResult> pipelineResults = this.camera.getAllUnreadResults();
+        this.update(poseEstimator, pipelineResults);
     }
 
     public List<PhotonPipelineResult> getResults()
