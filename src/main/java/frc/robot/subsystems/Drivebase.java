@@ -153,8 +153,7 @@ public class Drivebase extends SubsystemBase {
   }
 
   public void fieldOrientedDrive(double speedX, double speedY, double rot) {
-    ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, rot,
-        Rotation2d.fromDegrees(getFieldAngle()));
+    ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, rot, gyro.getRotation2d());
     this.drive(speeds);
   }
 
@@ -173,11 +172,12 @@ public class Drivebase extends SubsystemBase {
       speedY = slewRateY.calculate(speedY);
     }
 
-    if (this.fieldOrientedEntry.get(true)) {
-      fieldOrientedDrive(speedX, speedY, rot);
-    } else {
-      robotOrientedDrive(speedX, speedY, rot);
-    }
+    // if (this.fieldOrientedEntry.get(true)) {
+    //   fieldOrientedDrive(speedX, speedY, rot);
+    // } else {
+    //   robotOrientedDrive(speedX, speedY, rot);
+    // }
+    fieldOrientedDrive(speedX, speedY, rot);
   }
 
   /** drive:
@@ -185,7 +185,7 @@ public class Drivebase extends SubsystemBase {
    * moduleStates are in meters/sec and radians (for rotation).
    * This can be a source of angle mismatch degrees <> radians
    */
-  private void drive(ChassisSpeeds speeds) {
+  public void drive(ChassisSpeeds speeds) {
     SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(speeds, new Translation2d(0, 0));
     SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, MAX_VELOCITY);
 

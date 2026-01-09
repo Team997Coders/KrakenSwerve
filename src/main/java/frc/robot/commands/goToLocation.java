@@ -51,7 +51,7 @@ public class goToLocation extends Command {
     @Override
     public void initialize() {
         double bestDistance = 99999;
-        Pose2d bestPose;
+        Pose2d bestPose = new Pose2d();
         Pose2d robotPose = this.drivebase.getPose();
         List<Double> distances = new ArrayList<>();
 
