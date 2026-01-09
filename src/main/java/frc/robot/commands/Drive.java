@@ -15,12 +15,14 @@ public class Drive extends Command {
   private final Drivebase drivebase;
   private final Supplier<double[]> speedXY;
   private final DoubleSupplier rot;
+  private final DoubleSupplier rotationOffset;
 
   /** Creates a new Drive. */
-  public Drive(Drivebase drivebase, Supplier<double[]> speedXY, DoubleSupplier rot) {
+  public Drive(Drivebase drivebase, Supplier<double[]> speedXY, DoubleSupplier rot, DoubleSupplier rotationOffset) {
     this.drivebase = drivebase;
     this.speedXY = speedXY;
     this.rot = rot;
+    this.rotationOffset = rotationOffset;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(this.drivebase);
@@ -36,6 +38,8 @@ public class Drive extends Command {
   public void execute() {
     var xy = speedXY.get();
     var r = rot.getAsDouble();
+
+    drivebase.setRotationOffset(rotationOffset);
 
     drivebase.defaultDrive(-xy[1], -xy[0], r);
   }

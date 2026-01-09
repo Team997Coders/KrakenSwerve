@@ -75,7 +75,12 @@ public class RobotContainer {
         new Drive(
             drivebase,
             () -> getScaledXY(),
-            () -> scaleRotationAxis(driveStick.getRawAxis(4))));
+            () -> scaleRotationAxis(driveStick.getRawAxis(4)),
+            () -> driveStick.getRawAxis(3)
+            //.andThen(
+            //  drivebase.setRotationOffsetCommand(
+            //    () -> driveStick.getRawAxis(3)))
+    ));
 
     autoChooser = AutoBuilder.buildAutoChooser("moveForward");
     SmartDashboard.putData("Auto Choser", autoChooser);
@@ -180,6 +185,8 @@ public class RobotContainer {
     
     //When holding x robot goes to closest location in potential locations
     //c_driveStick.x().whileTrue(new goToLocation(drivebase, potentialLocations));
+    c_driveStick.y().onTrue(drivebase.toggleRotationLockCommand())
+    ;
   }
 
   /**

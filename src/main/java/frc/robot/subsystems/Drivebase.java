@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.Orchestra;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -30,6 +32,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.DriveConstants.ModuleLocations;
@@ -46,6 +49,9 @@ public class Drivebase extends SubsystemBase {
   private final double MAX_VOLTAGE = 12;
 
   private Canandgyro gyro;
+
+  private double rotationOffset = 0.0;
+  private boolean rotationLock = false;
 
   private SwerveModule frontLeft = new SwerveModule(SwerveModules.frontLeft, MAX_VELOCITY, MAX_VOLTAGE);
   private SwerveModule frontRight = new SwerveModule(SwerveModules.frontRight, MAX_VELOCITY, MAX_VOLTAGE);
@@ -186,7 +192,7 @@ public class Drivebase extends SubsystemBase {
    * This can be a source of angle mismatch degrees <> radians
    */
   public void drive(ChassisSpeeds speeds) {
-    SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(speeds, new Translation2d(0, 0));
+    SwerveModuleState[] moduleStates = kinematics.toSwerveModuleStates(speeds, new Translation2d(rotationOffset, 0));
     SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, MAX_VELOCITY);
 
     this.frontLeft.drive(moduleStates[0]);
@@ -245,5 +251,28 @@ public class Drivebase extends SubsystemBase {
     this.cameraBlock.update(poseEstimator);
 
     field.setRobotPose(poseEstimator.getEstimatedPosition());
+  }
+
+  public void setRotationOffset(DoubleSupplier offset)
+  {
+    if (!rotationLock)
+    {
+      rotationOffset = offset.getAsDouble();
+    }
+  }
+
+  public Command setRotationOffsetCommand(DoubleSupplier offset) 
+  {
+    return this.runOnce(()->setRotationOffset(offset) );
+  }
+
+  public void toggleRotationLock()
+  {
+    rotationLock = !rotationLock;
+  }
+
+  public Command toggleRotationLockCommand() 
+  {
+    return this.runOnce(()->toggleRotationLock());
   }
 }
